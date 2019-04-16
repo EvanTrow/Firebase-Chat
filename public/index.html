@@ -1,0 +1,454 @@
+<html>
+
+<head>
+  <title>Chat</title>
+  <link rel="icon" href="img/defaulfConversationIcon.png">
+
+  <link rel="manifest" href="/manifest.json">
+
+  <meta property="og:title" content="TrowLink Chat" />
+  <meta property="og:image" content="https://chat.trowlink.com/img/defaulfConversationIcon.png" />
+  <meta property="og:description" content="Realtime chat via firebase." />
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script language="javascript" src="js/compression/lz-string.min.js"></script>
+  <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="https://trowlink.com/domain.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('.modal').modal();
+      $('.collapsible').collapsible('open', 0);
+      $('input#input_text, textarea#textarea1').characterCounter();
+      $('.dropdown-button').dropdown({
+        inDuration: 300,
+        outDuration: 225,
+        constrainWidth: false, // Does not change width of dropdown to that of the activator
+        hover: true, // Activate on hover
+        gutter: 0, // Spacing from edge
+        belowOrigin: false, // Displays dropdown below the button
+        alignment: 'left', // Displays dropdown with edge aligned to the left of button
+        stopPropagation: false // Stops event propagation
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-wrapper blue">
+      <a href="#" class="brand-logo center">Chat</a>
+      <a href="#" data-activates="mobileSideNav" class="button-collapse">
+        <i class="material-icons">menu</i>
+      </a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li id="account" style="display: none">
+          <a href="#profileModal" class="modal-trigger">
+            <img id="accountProfileImg" src="" style="position: relative; top: 6.5px; right: 4px" height="24" width="24" alt="" class="circle responsive-img"
+            />
+            <span id="acountName"></span>
+          </a>
+        </li>
+        <li>
+          <a id="signOutBtn" style="display: none">
+            <i class="left material-icons">exit_to_app</i>
+            <span>Sign Out</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="side-nav" id="mobileSideNav">
+        <li id="accountMobile" style="display: none">
+          <a href="#profileModal" class="modal-trigger">
+            <img id="accountProfileImgMobile" src="" style="position: relative; top: 6.5px; right: 4px" height="24" width="24" alt=""
+              class="circle responsive-img" />
+            <span id="accountNameMobile"></span>
+          </a>
+        </li>
+        <li id="signoutMobile" style="display: none">
+          <a>
+            <i class="left material-icons">exit_to_app</i>
+            <span>Sign Out</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container" id="signin-signup-page">
+    <ul class="collapsible" data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header">
+          <i class="material-icons">account_circle</i>
+          Log In
+        </div>
+        <div class="container collapsible-body" style="padding-top: 20px;">
+          <label for="email">
+            <b>Email</b>
+          </label>
+          <input type="email" placeholder="Enter Email" name="email" id="emailSignIn">
+
+          <br>
+
+          <label for="password">
+            <b>Password</b>
+          </label>
+          <input type="password" placeholder="Enter Password" name="password" id="passwordSignIn">
+
+          <a class="waves-effect waves-light btn" id="signInBtn">Sign In</a>
+        </div>
+      </li>
+
+      <li>
+        <div class="collapsible-header">
+          <i class="material-icons">account_circle</i>
+          Sign Up
+        </div>
+        <div class="container collapsible-body" style="padding-top: 20px;">
+          <div class="row">
+            <div class="col s12">
+
+
+              <a id="profileImgSignUp" href="#">
+                <img id="profileImgDisplay" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWgAAAFoCAMAAABNO5HnAAAAvVBMVEXh4eGjo6OkpKSpqamrq6vg4ODc3Nzd3d2lpaXf39/T09PU1NTBwcHOzs7ExMS8vLysrKy+vr7R0dHFxcXX19e5ubmzs7O6urrZ2dmnp6fLy8vHx8fY2NjMzMywsLDAwMDa2trV1dWysrLIyMi0tLTCwsLKysrNzc2mpqbJycnQ0NC/v7+tra2qqqrDw8OoqKjGxsa9vb3Pz8+1tbW3t7eurq7e3t62travr6+xsbHS0tK4uLi7u7vW1tbb29sZe/uLAAAG2UlEQVR4XuzcV47dSAyG0Z+KN+ccO+ecHfe/rBl4DMNtd/cNUtXD6DtLIAhCpMiSXwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIhHnfm0cVirHTam884sVu6Q1GvPkf0heq7VE+UF5bt2y97Vat+VlRniev/EVjjp12NlgdEytLWEy5G2hepDYOt7qGob2L23Dd3valPY6dsW+jvaBOKrkm2ldBVrbag+2tYeq1oX6RxYBsF6SY3vA8to8F0roRJaZmFFK2ASWA6CiT6EhuWkoQ9gablZ6l1oW47aWoF8dpvT6FrOunoD5pa7uf6CaslyV6rqD0guzYHLRK/hwJw40Cu4MUdu9Bt8C8yR4Jt+gRbmzEKvUTicFw8kY3NonOg/aJpTTf2AWWBOBTNBkvrmWF+QNDPnZoLUNOeagpKSOVdKhK550BVa5kGLOFfMCxY92ubFuYouNC9CFdyuebKrYrsyL9hcGpgnAxVaXDJPSrGKrGreVFVkU/NmykDJj1sV2Z55s0e74hwtS9k8KvNzxY8ZozvX+L67M4/uVFwT84Kt9CPz6EjFdUqgMyCjCTSHWD4cq7jOzKMzxtGu8ddwxzzaUXHFgXkTxCqwyLyJOON0j9POc/OCpbAj+hU/Zsz9Pbk2T65VbM/mybOKbd882VexjegLPXk0L154uvF/tR5N7RjJB9bvBsLEPJgI5dCcC2P5wL3QlSClJ+bYSSpIqpljh4IkpWNzapzqB3T9vCGBuGUOtWL9hDNPizMYmjND/QIloTkSJvKB4tHRK1iaE0u9hnhgDgxi/QFJZLmLEv0FvbHlbNzTG9ApWa5KHb0J9cByFNT1DhznGOngWO9CvWQ5KdX1AXweWy7Gn/Uh9CLLQdTTCkgPLLODVCshPrSMarHWgUpkGURrl2c83drWbp+0PlRebCsvFW0G+6FtLNzXxlDuXttGrrtlbQPlacvW1ppmCDPOHgJbQ/BwpmyQnh6siHVwcJoqB3iqNx/tHY/N+pPyg7Rz83Xv0n5zuff1ppPKCSS9audf1V6i9QAAAAAAAAAAAAAAAAAAAAAAEMdyAuVeZ9I4H95/uojGgf0QjKOLT/fD88ak0ysrI6SVo9qXRWgrhIsvtaNKqs2hXNlvD0LbSDho71fKWhsxvulf2NYu+jcro42d+e0isMyCxe18R2/D6HQYWY6i4elIryE9brbMgVbzONVP2G3sBeZMsNfYFf5h715302aDIADP2Lw+CIdDQhKcGuIgKKSIk1MSMND7v6zvBvqprdqY3bWfS1itRto/O+52t+KnW+2+OdSYK+5TViS9LxxqyX07p6xUeq7hXl+WPq/AX15QI+9fDryaw5d31EP7HPGqonMb5rmvYwow/upgWTDzKYQ/C2BV3o8oSNTPYVH26FEY7zGDNfnZo0DeOYclwc6jUN4ugBVxZ0HBFp0YJoxaFK41gn7ZGxWYZtDNrSOqEK0dFLscqMbhArXuIioS3UGnHw9U5uEHFCp9quOXUGfrUSFvC11cl0p1nbK+KwHs92yFYyo2DqFEsKdq+wAqhHsqtw+hQHykescY4rnvNOC7g3TPNOEZwt3QiBuINkxpRDqEZFOaMYVgTzTkCWKFGxqyCSHVkqYsIVQQ0ZQogEwJjUkgkvNpjO8g0ZzmzCHRieacIJBLaU7qIE+bBrUhz5YGbSHPmQadIc+EBk0gT48G9SDPPQ06QZ5gQ3M2AQQa0ZwRqtCExz1kClc0ZRVCqFuacguxEhqSQC53pBlHB8HyDY3Y5BDttgnoinRoQgfinZrTuxrxgeodYiiQ+1TOz6HCy4KqLV6gREHVCqjxSsVeociaaq2hyjOVeoYyXarUhTrdZs4VeaQ6j9DIdZsXEhXpU5U+1EqoSALFtlRjC9VGHlXwRlCuTKlAWkK9rEfxehkMCB8o3EMIE1yfovUdrHiKKFb0BEMuPQrVu8CU9xNFOr3DmtcFxVm8wqBsTGHGGUxya4+CeGsHqwZjijEewDAn5Rt9dOdgWzZt6kAqMm/xylpz1EI8i3hF0SxGXQxPvJrTEHXyMuVVTF9QN+WElZuUqKPiyEodC9RV+cbKvJWos0E1TbTe4wB1l89W/GSrWY4G4G4+NUHebhwEkGGYtPgpWskQAkjSXvr8x/xlGz/RKHcr/jOrXYn/1bh0Jh7/mjfpXPALjXC+O/Av7HfzEL+nERbJZME/tpgkRYg/1Mjms48Wf1PrYzbPIIBW8aDY9j/2vsef8vz9R39bDOL/2qlDIwCBGACCOMTLl4klOpP+i4MimFe7DZy7v3rcuaYqej+f3VE1K09+AgAAAAAAAAAAAAAAAAAAAAAAgBf6wsTW1jN3CAAAAABJRU5ErkJggg=="
+                  height="96" width="96" alt="" class="circle responsive-img">
+              </a>
+              <input id="profileImgInput" type="file" name="profileImgSelect" accept="image/*" style="display: none;" />
+
+
+
+            </div>
+            <div class="col m6">
+              <label for="email">
+                <b>Email</b>
+              </label>
+              <input type="email" placeholder="Enter Email" name="email" id="emailSignUp">
+            </div>
+            <div class="col m6">
+              <label for="dispName">
+                <b>Display Name</b>
+              </label>
+              <input type="text" placeholder="Enter Desired Display Name" name="displayName" id="displayName">
+            </div>
+          </div>
+
+          <br>
+          <div class="row">
+            <div class="col m6">
+              <label for="password">
+                <b>Password</b>
+              </label>
+              <input type="password" placeholder="Enter Password" name="password" id="password2SignUp">
+            </div>
+            <div class="col m6">
+              <label for="password">
+                <b>Re-Enter Password </b>
+              </label>
+              <input type="password" placeholder="Enter Password Again" name="password" id="passwordSignUp">
+            </div>
+          </div>
+          <a class="waves-effect waves-light btn" id="signUpBtn">Sign Up</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <h4 id="modalTitle" style="display: inline-block;">Edit Profile</h4>
+      <div id="editProfileForm" class="row">
+        <div class="col s12">
+          <div class="row">
+            <div class="col s12">
+              ID:
+              <span id="showUserID" class="light"></span>
+            </div>
+            <div class="col s12">
+              <a id="profileImgEdit" href="#">
+                <img id="profileImgDisplayEdit" src="" height="96" width="96" alt="" class="circle responsive-img">
+              </a>
+              <input id="profileImgInputEdit" type="file" name="profileImgSelectEdit" accept="image/*" style="display: none;" />
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <input id="displayNameEdit" type="text" class="validate">
+                <label for="displayNameEdit">Display Name</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" id="saveProfileBtn" onclick="saveProfle()" class="modal-action waves-effect btn green right">Save Changes</a>
+      <a href="#" class="modal-action modal-close waves-effect btn-flat">Cancel</a>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="newConversationModal" class="modal">
+    <div class="modal-content">
+      <h4 id="modalTitle" style="display: inline-block;">New Conversation</h4>
+      <div id="newConversationForm" class="row">
+        <div class="row">
+          <div class="col s12">
+            <a id="newConversationImg" href="#">
+              <img id="newConversationImgDisplay" src="img/defaulfConversationIcon.png" height="96" width="96" alt="" class="circle responsive-img">
+            </a>
+            <input id="newConversationImgInput" type="file" name="newConversationImgSelect" accept="image/*" style="display: none;" />
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <input id="newConversationName" type="text" class="validate">
+              <label for="newConversationName">Conversation Name</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" id="createNewConversationBtn" onclick="createConversation()" class="modal-action waves-effect btn green right">Create</a>
+      <a href="#" class="modal-action modal-close waves-effect btn-flat">Cancel</a>
+    </div>
+  </div>
+
+  <div id="userInfo" style="padding-left: 10px;" class="modal">
+    <div class="modal-content">
+      <img id="userInfoImage" class="circle responsive-img">
+      <h4 id="userInfoTitle" style="display: inline-block;"></h4>
+      <p id="usersId"></p>
+      <img id="userInfoProfileImg" src="" height="96" width="96" alt="" class="circle responsive-img">
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
+    </div>
+  </div>
+
+
+  <!-- Modal Structure -->
+  <div id="friendsModal" class="modal">
+    <div class="modal-content">
+      <h4 id="modalTitle">Friends</h4>
+      <div id="newFriendForm" class="row">
+        <div class="row">
+          <div class="row">
+            <div class="input-field col s7">
+              <input id="newFriendId" type="text">
+              <label for="newFriendId">User ID</label>
+            </div>
+            <div class="input-field col s5">
+              <a id="addFrendBtn" class="waves-effect waves-light btn blue">
+                <i class="material-icons left">add</i>Add Friend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="friends-list">
+        <ul class="collection with-header">
+          <li class="collection-header">
+            <h5>Friends</h5>
+          </li>
+          <div class="friends-collection">
+            <!-- FRIENDS LIST -->
+          </div>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="editConversationModal" class="modal">
+    <div class="modal-content">
+      <h4 id="modalTitleEditConversation" style="display: inline-block;">Edit Conversation</h4>
+      <div id="editConversationForm" class="row">
+        <div class="col s12">
+          <div class="row">
+            <div class="col s12 editConversationImgSection">
+              <a id="editConversationImg" href="#">
+                <img id="editConversationImgDisplay" src="img/defaulfConversationIcon.png" height="96" width="96" alt="" class="circle responsive-img">
+              </a>
+              <input id="editConversationImgInput" type="file" name="editConversationImgSelect" accept="image/*" style="display: none;"
+              />
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <input id="editConversationName" type="text" class="validate">
+                <label for="editConversationName">Conversation Name</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conversation-member-list">
+        <ul class="collection with-header">
+          <li class="collection-header">
+            <h5>Members</h5>
+          </li>
+          <div class="conversation-member-collection">
+            <!-- USER LIST -->
+          </div>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a id="deleteConversationBtn" style="display: none;" class="modal-action waves-effect btn red left" onclick="deleteConversation()">Delete</a>
+      <a id="leaveConversationBtn" style="display: none;" class="modal-action waves-effect btn red left" onclick="leaveConversation()">Leave</a>
+      <a id="editConversationBtn" style="display: none;" class="modal-action waves-effect btn green right" onclick="editConversation()">Save</a>
+      <a href="#" class="modal-action modal-close waves-effect btn-flat">Cancel</a>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="addMemberModal" class="modal bottom-sheet">
+    <div class="modal-content">
+      <h4>Add Member</h4>
+      <div class="row">
+        <div class="col s12">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">textsms</i>
+              <input type="text" id="addMemberDisplayName" class="autocomplete">
+              <label for="addMemberDisplayName">Friends Display Name</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+  </div>
+
+  <div id="messages-page" style="display: none;">
+    <div class="create-conversation">
+      <a href="#newConversationModal" class="modal-trigger btn-floating waves-effect waves-light blue darken-2">
+        <i class="material-icons">add</i>
+      </a>
+    </div>
+
+    <div class="add-friend">
+      <a href="#friendsModal" onclick="getFriendsList()" class="modal-trigger btn-floating waves-effect waves-light blue darken-2">
+        <i class="material-icons">person</i>
+      </a>
+      <div class="new-friend-notify"></div>
+    </div>
+
+    <div class="row">
+      <div class="col s4 conversation">
+        <ul class="collection conversation-collection">
+          <div class="preloader-wrapper small active center">
+            <div class="spinner-layer spinner-blue">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-red">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-yellow">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-green">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+          <!-- CHATS LIST -->
+        </ul>
+      </div>
+      <div class="col s8 message-section">
+
+        <div class="manage-conversation">
+          <span id="chat-title"></span>
+          <br>
+          <span id="chat-key" class="light"></span>
+          <div class="manage-conversation-more" style="display: none;">
+            <a id="conversationEdit" onclick="getFriendsList();" href="#editConversationModal" class="modal-trigger btn-floating halfway-fab waves-effect waves-dark white">
+              <i class="material-icons black-text">more_vert</i>
+            </a>
+          </div>
+        </div>
+
+        <div class="messages">
+          <!-- MESSAGES -->
+        </div>
+
+
+        <div class="message-textinput-section">
+          <div class="row">
+            <div class="input-field col s12">
+              <input disabled="disabled" id="message" type="text" data-length="300">
+              <label for="message">Type a message</label>
+            </div>
+            <a id="attachImageBtn" href="#!" class="btn-floating halfway-fab waves-effect waves-dark white">
+              <i class="material-icons black-text">add_photo_alternate</i>
+            </a>
+            <input id="attachImgInput" type="file" name="attachImgSelect" accept="image/*" style="display: none;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+  <script src='http://shawnmclean.com/Idle.js/lib/idle.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script src="js/materalizeInit.js"></script>
+  <script src="js/init.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/signUp.js"></script>
+  <script src="js/initChat.js"></script>
+  <script src="js/signOut.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/switchConversation.js"></script>
+  <script src="js/createConversation.js"></script>
+  <script src="js/editConversation.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/displayUserInfo.js"></script>
+  <script src="js/attachImage.js"></script>
+
+</body>
+
+</html>
